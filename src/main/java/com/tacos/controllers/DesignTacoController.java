@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -19,9 +20,10 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import com.tacos.model.Ingredient;
 import com.tacos.model.Order;
 import com.tacos.model.Taco;
+import com.tacos.model.User;
 import com.tacos.model.Ingredient.Type;
 import com.tacos.repositoies.IngredientRepository;
-import com.tacos.repositoies.TacosRepository;
+import com.tacos.repositoies.TacoRepository;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,14 +32,14 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/design")
 @SessionAttributes("order")
 public class DesignTacoController {
-	
-	private final IngredientRepository ingredientRepo;
-	private final TacosRepository designRepo;
+
+	private final IngredientRepository ingredientRepository;
+	private final TacoRepository designRepository;
 	
 	@Autowired
-	public DesignTacoController(IngredientRepository ingredientRepo, TacosRepository tacoRepo) {
-		this.ingredientRepo = ingredientRepo;
-		this.designRepo = tacoRepo;
+	public DesignTacoController(IngredientRepository ingredientRepo, TacoRepository tacoRepo) {
+		this.ingredientRepository = ingredientRepo;
+		this.designRepository = tacoRepo;
 	}
 	
 	@ModelAttribute(name="order")
@@ -50,10 +52,15 @@ public class DesignTacoController {
 		return new Taco();
 	}
 	
+    @ModelAttribute(name = "user")
+    public User getUser(@AuthenticationPrincipal User user) {
+        return user;
+    }
+	
 	@GetMapping
 	public String showDesignForm(Model model) {
 		List<Ingredient> ingredients = new ArrayList<>();
-		ingredientRepo.findAll().forEach(ingredient -> ingredients.add(ingredient));
+		ingredientRepository.findAll().forEach(ingredient -> ingredients.add(ingredient));
 		
 		Type[] types = Ingredient.Type.values();
 		for (Type type : types) {
@@ -69,7 +76,7 @@ public class DesignTacoController {
 			log.info("Incomplete design or incorrect name!");
 			return "design";
 		}
-		Taco saved = designRepo.save(design);
+		Taco saved = designRepository.save(design);
 		order.addDesign(saved);
 		log.info("Processing design: " + design);
 		return "redirect:/orders/current";

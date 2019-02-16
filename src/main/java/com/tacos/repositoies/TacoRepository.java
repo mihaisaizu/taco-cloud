@@ -1,7 +1,9 @@
 package com.tacos.repositoies;
 
+import org.springframework.data.repository.CrudRepository;
+
 import com.tacos.model.Taco;
 
-public interface TacosRepository {
-	Taco save(Taco taco);
+public interface TacoRepository extends CrudRepository<Taco, String> {
+
 }

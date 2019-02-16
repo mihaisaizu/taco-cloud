@@ -1,8 +1,10 @@
+
 package com.tacos.controllers;
 
 import javax.validation.Valid;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,25 +22,26 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/orders")
 @SessionAttributes("order")
 public class OrderController {
-	
-	private OrderRepository orderRepo;
 
-	public OrderController(OrderRepository orderRepo) {
-		this.orderRepo = orderRepo;
+	private OrderRepository orderRepository;
+
+	public OrderController(OrderRepository orderRepository) {
+		this.orderRepository = orderRepository;
 	}
+
 	@GetMapping("/current")
-	public String orderForm() {
+	public String orderForm(Model model) {
 		log.info("Complete your credentials to order your creation");
 		return "orderForm";
 	}
-	
+
 	@PostMapping
 	public String processOrder(@Valid Order order, Errors errors, SessionStatus sessionStatus) {
 		if (errors.hasErrors()) {
 			log.info("All fields are mandatory!");
 			return "orderForm";
 		}
-		orderRepo.save(order);
+		orderRepository.save(order);
 		sessionStatus.setComplete();
 		log.info("Order submited:" + order);
 		return "redirect:/";
