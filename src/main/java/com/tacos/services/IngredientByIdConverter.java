@@ -1,4 +1,6 @@
-package com.tacos.controllers;
+package com.tacos.services;
+
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
@@ -19,7 +21,8 @@ public class IngredientByIdConverter implements Converter<String, Ingredient>{
 	
 	@Override
 	public Ingredient convert(String source) {
-		return ingredientRepository.findById(source).get();
+		 Optional<Ingredient> optionalIngredient = ingredientRepository.findById(source);
+			return optionalIngredient.isPresent() ? optionalIngredient.get() : null;
 	}
 
 }

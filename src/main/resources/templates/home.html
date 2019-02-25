@@ -1,13 +1,17 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
 <head>
-	<title>Taco Cloud</title>
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" 
-	    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<title>Taco Cloud</title>
 </head>
-<body >
+
+<body>
 	<h1>Welcome to...</h1>
-	<img th:src="@{/images/TacoCloud.png}"/>
-	<a th:href="@{'/design'}">Taco Design</a>
+	<img th:src="@{/images/TacoCloud.png}" />
+<!-- 	<form method="POST" th:action="@{/logout}" id="logoutForm">
+		<input type="submit" value="Logout" />
+	</form> -->
+
+	<a th:href="@{/design}" id="design">Design a taco</a>
 </body>
 </html>

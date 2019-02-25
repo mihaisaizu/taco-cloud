@@ -1,5 +1,4 @@
 package com.tacos.model;
-
 import java.util.Date;
 import java.util.List;
 
@@ -29,8 +28,8 @@ public class Taco {
 	private Date createdAt;
 
 	@ManyToMany(targetEntity=Ingredient.class)
-	@Size(min=2, message="You must choose at least 2 ingredient")
-	private List<String> ingredients;
+    @Size(min=1, message = "You must choose at least 1 ingredient")
+	private List<Ingredient> ingredients;
 	
 	@PrePersist
 	void createdAt() {

@@ -14,42 +14,46 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+	
+	@Autowired
+	private UserDetailsService userDetailsService;
 
-    @Autowired
-    private UserDetailsService userDetailsService;
-
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-                .userDetailsService(userDetailsService)
-                .passwordEncoder(passwordEncoder());
+	@Override
+	 protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		 auth
+         	.userDetailsService(userDetailsService)
+         	.passwordEncoder(encoder());
     }
 
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		 http
+	      .authorizeRequests()
+	        .antMatchers("/design", "/orders")
+	          .access("hasRole('ROLE_USER')")
+	        .antMatchers("/**").access("permitAll")
+	        
+	      .and()
+	        .formLogin()
+	          .loginPage("/login")
+	          
+	      .and()
+	        .logout()
+	          .logoutSuccessUrl("/")
+	          
+	      .and()
+	        .csrf()
+	          .ignoringAntMatchers("/h2-console/**")
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-                .antMatchers("/design", "/orders", "/h2-console/**")
-                    .hasRole("USER")
-                .antMatchers("/","/**")
-                    .permitAll()
-                .and()
-                    .formLogin()
-                    .loginPage("/login")
-                .and()
-                    .logout()
-                    .logoutSuccessUrl("/login")
-                .and()
-                    .csrf().ignoringAntMatchers("/h2-console/**")
-                .and()
-                    .headers().frameOptions().sameOrigin();
+	      // Allow pages to be loaded in frames from the same origin; needed for H2-Console
+	      .and()  
+	        .headers()
+	          .frameOptions()
+	            .sameOrigin();
+	}
 
-        //see https://www.logicbig.com/tutorials/spring-framework/spring-boot/jdbc-security-with-h2-console.html
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
+	@Bean
+	public PasswordEncoder encoder() {
+		return new BCryptPasswordEncoder();
+	}
 }

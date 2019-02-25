@@ -1,5 +1,6 @@
 package com.tacos.controllers;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -7,7 +8,6 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -24,10 +24,8 @@ import com.tacos.model.User;
 import com.tacos.model.Ingredient.Type;
 import com.tacos.repositoies.IngredientRepository;
 import com.tacos.repositoies.TacoRepository;
+import com.tacos.repositoies.UserRepository;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 @Controller
 @RequestMapping("/design")
 @SessionAttributes("order")
@@ -35,11 +33,13 @@ public class DesignTacoController {
 
 	private final IngredientRepository ingredientRepository;
 	private final TacoRepository designRepository;
+	private UserRepository userRepository;
 	
 	@Autowired
-	public DesignTacoController(IngredientRepository ingredientRepo, TacoRepository tacoRepo) {
+	public DesignTacoController(IngredientRepository ingredientRepo, TacoRepository tacoRepo, UserRepository userRepository) {
 		this.ingredientRepository = ingredientRepo;
 		this.designRepository = tacoRepo;
+		this.userRepository = userRepository;
 	}
 	
 	@ModelAttribute(name="order")
@@ -47,42 +47,36 @@ public class DesignTacoController {
 		return new Order();
 	}
 	
-	@ModelAttribute(name="taco")
+	@ModelAttribute(name="design")
 	public Taco taco() {
 		return new Taco();
 	}
-	
-    @ModelAttribute(name = "user")
-    public User getUser(@AuthenticationPrincipal User user) {
-        return user;
-    }
-	
-	@GetMapping
-	public String showDesignForm(Model model) {
-		List<Ingredient> ingredients = new ArrayList<>();
-		ingredientRepository.findAll().forEach(ingredient -> ingredients.add(ingredient));
 		
+	@GetMapping
+	public String showDesignForm(Model model, Principal principal) {
+		List<Ingredient> ingredients = new ArrayList<>();
+		ingredientRepository.findAll().forEach(i -> ingredients.add(i));
+
 		Type[] types = Ingredient.Type.values();
 		for (Type type : types) {
 			model.addAttribute(type.toString().toLowerCase(), filterByType(ingredients, type));
 		}
-		model.addAttribute("taco", new Taco());
- 		return "design";
+		String username = principal.getName();
+		User user = userRepository.findByUsername(username);
+		model.addAttribute("user", user);
+		return "design";
 	}
-	
+    
 	@PostMapping
-	public String processDesign(@Valid Taco design, Errors errors, @ModelAttribute Order order) {
+	public String processDesign(@Valid Taco taco, Errors errors, @ModelAttribute Order order) {
 		if (errors.hasErrors()) {
-			log.info("Incomplete design or incorrect name!");
 			return "design";
 		}
-		Taco saved = designRepository.save(design);
+		Taco saved = designRepository.save(taco);
 		order.addDesign(saved);
-		log.info("Processing design: " + design);
 		return "redirect:/orders/current";
 	}
 	
-
 	private List<Ingredient> filterByType(List<Ingredient> ingredients, Type type) {
 		return ingredients.stream()
 				.filter(ingredient -> ingredient.getType().equals(type))

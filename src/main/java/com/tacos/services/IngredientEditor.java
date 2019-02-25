@@ -1,9 +1,10 @@
-package com.tacos.model;
+package com.tacos.services;
 
 import java.beans.PropertyEditorSupport;
 
 import org.springframework.util.StringUtils;
 
+import com.tacos.model.Ingredient;
 import com.tacos.repositoies.IngredientRepository;
 
 public class IngredientEditor extends PropertyEditorSupport {
